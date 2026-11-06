@@ -27,7 +27,7 @@ for intent in intents['intents']: # intent dictionary (from intent.json)
         if intent['tag'] not in classes: # classes contains all tags which has been processed till now, tags-order-as-first_match...
             classes.append(intent['tag'])  
 
-words = [lemmatizer.lemmatize(word) for word in words if word not in ignoreLetters] # take words(tokenized patterns/greetings) - remove ignore characters(.,?!) - lemmatize remaining words
+words = [lemmatizer.lemmatize(word.lower()) for word in words if word not in ignoreLetters] # take words(tokenized patterns/greetings) - remove ignore characters(.,?!) - lemmatize remaining words
 
 words = sorted(set(words)) # remove repeated, sort and then put the sorted/cleaned tokenized patterns/greetings
 
@@ -43,7 +43,7 @@ for document in documents:
     wordPatterns = document[0] # wordPatterns = tokenized greetings from (tokenized greetings, tag)
     wordPatterns = [lemmatizer.lemmatize(word.lower()) for word in wordPatterns] # lowerCase each greeting token then lemmatize and put back into wordPatterns
     for word in words: # if our unique-sorted-tokenized-patterns/greetings in wordPatterns (lemmatized-lowercase-tokenized-greetings/patterns) then put it in bag list
-        bag.append(1) if words in wordPatterns else bag.append(0)
+        bag.append(1) if word in wordPatterns else bag.append(0)
 
     outputRow = list(outputEmpty) # outputRow = List ( [0,0,0.... len(classes)] ) - make a fresh COPY of the blank answer sheet (copy, so we don't edit the original blank one)
     outputRow[classes.index(document[1])] = 1 # document[1] is the tag of this pattern, classes.index(...) finds its position, and we flip that slot to 1 -> "this pattern belongs to THIS class" (one-hot encoding)
@@ -69,7 +69,7 @@ sgd = tf.keras.optimizers.SGD(learning_rate=0.01, momentum=0.9, nesterov= True)
 model.compile(loss="categorical_crossentropy", optimizer= sgd, metrics=["accuracy"])
 
 hist = model.fit(
-    np.array(trainX), np.array(trainY), epochs=250, batch_size=5, verbose=1
+    np.array(trainX), np.array(trainY), epochs=400, batch_size=5, verbose=1
 )
 
 
